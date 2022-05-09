@@ -6,6 +6,10 @@
 #include "../task_utils/task_properties.h"
 #include "../utils/logging.h"
 
+#include "../search_engines/eager_search.h"
+#include "../evaluators/g_evaluator.h"
+#include "../open_lists/best_first_open_list.h"
+
 #include <cassert>
 
 using namespace std;
@@ -71,16 +75,22 @@ int FFHeuristic::compute_heuristic(const State &ancestor_state) {
 
     int h_ff = 0;
     double adj_h_ff = 0.0;
+    std::unordered_map<std::string, int> op_type_counts;
+
     for (size_t op_no = 0; op_no < relaxed_plan.size(); ++op_no) {
         if (relaxed_plan[op_no]) {
             relaxed_plan[op_no] = false; // Clean up for next computation.
             h_ff += task_proxy.get_operators()[op_no].get_cost();
 
-            string op_type = task_proxy.get_operators()[op_no].get_name().substr(0,task_proxy.get_operators()[op_no].get_name().find(" "));
-            adj_h_ff += op_weights[op_type];
+            if (use_learned_weights) {
+                string op_type = task_proxy.get_operators()[op_no].get_name().substr(0,task_proxy.get_operators()[op_no].get_name().find(" "));
+                if (use_learned_weights) {
+                    adj_h_ff += op_weights[op_type];
+                }
+            }
         }
     }
-    
+
     if (use_learned_weights) {
         return ceil(adj_h_ff);
     } else {
@@ -104,8 +114,8 @@ static shared_ptr<Heuristic> _parse(OptionParser &parser) {
     parser.document_property("preferred operators", "yes");
 
     parser.add_option<bool>("use_learned_weights", "use learned weights", "false");
-    parser.add_list_option<string>("operator_names", "operator names");
-    parser.add_list_option<double>("operator_weights", "operator weights (same order as names)");
+    parser.add_list_option<string>("operator_names", "operator names","[]" );
+    parser.add_list_option<double>("operator_weights", "operator weights (same order as names)","[]");
 
     Heuristic::add_options_to_parser(parser);
     Options opts = parser.parse();    
