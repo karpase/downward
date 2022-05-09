@@ -1,3 +1,7 @@
+Modified to use learned weights for FF
+
+
+
 <img src="misc/images/fast-downward.svg" width="800" alt="Fast Downward">
 
 Fast Downward is a domain-independent classical planning system.
