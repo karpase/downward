@@ -26,6 +26,10 @@ class FFHeuristic : public additive_heuristic::AdditiveHeuristic {
     // Relaxed plans are represented as a set of operators implemented
     // as a bit vector.
     using RelaxedPlan = std::vector<bool>;
+    std::unordered_map<std::string, double> op_weights;
+    bool use_learned_weights = false;
+
+
     RelaxedPlan relaxed_plan;
     void mark_preferred_operators_and_relaxed_plan(
         const State &state, PropID goal_id);
